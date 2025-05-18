@@ -2,6 +2,6 @@ package exception;
 
 public class DecryptionException extends BaseException {
 	public DecryptionException() {
-		super(ErrorCode.DECRYPTION_FAIL.getCode(), ErrorCode.DECRYPTION_FAIL.getMessage());
+		super(ErrorCode.DECRYPTION_FAIL.getMessage());
 	}
 }

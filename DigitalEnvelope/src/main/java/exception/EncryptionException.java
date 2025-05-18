@@ -2,6 +2,6 @@ package exception;
 
 public class EncryptionException extends BaseException {
     public EncryptionException() {
-        super(ErrorCode.ENCRYPTION_FAIL.getCode(), ErrorCode.ENCRYPTION_FAIL.getMessage());
+        super(ErrorCode.ENCRYPTION_FAIL.getMessage());
     }
 }

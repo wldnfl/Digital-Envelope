@@ -2,6 +2,6 @@ package exception;
 
 public class SignatureException extends BaseException {
 	public SignatureException() {
-		super(ErrorCode.SIGNATURE_FAIL.getCode(), ErrorCode.SIGNATURE_FAIL.getMessage());
+		super(ErrorCode.SIGNATURE_FAIL.getMessage());
 	}
 }
