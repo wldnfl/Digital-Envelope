@@ -8,6 +8,7 @@ public class KeyManager {
 	private static final String RSA_KEY_FILE = "rsa_keypair.dat";
 	private static final String AES_KEY_FILE = "aes_key.dat";
 
+	// RSA 키 생성
 	public static void generateRSAKeyPair(String keyFolderPath) throws Exception {
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 		keyGen.initialize(2048);
@@ -19,6 +20,7 @@ public class KeyManager {
 		}
 	}
 
+	// RSA 키 복구
 	public static KeyPair loadRSAKeyPair(String keyFolderPath) throws Exception {
 		File rsaFile = new File(keyFolderPath, RSA_KEY_FILE);
 		if (!rsaFile.exists() || !rsaFile.canRead()) {
@@ -32,6 +34,7 @@ public class KeyManager {
 		}
 	}
 
+	// AES 키 생성
 	public static SecretKey generateAESKey(String keyFolderPath) throws Exception {
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(128);
@@ -45,6 +48,7 @@ public class KeyManager {
 		return secretKey;
 	}
 
+	// AES 키 복구
 	public static SecretKey loadAESKey(String keyFolderPath) throws Exception {
 		File aesFile = new File(keyFolderPath, AES_KEY_FILE);
 		if (!aesFile.exists() || !aesFile.canRead()) {

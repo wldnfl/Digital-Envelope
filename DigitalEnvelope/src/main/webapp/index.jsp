@@ -1,16 +1,21 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <html>
 <head>
-<title>사내 내부 고발 시스템</title>
+<title>내부 보고 시스템</title>
 </head>
 <body>
-	<h2>🏠 내부 고발 시스템 홈</h2>
+	<h1>내부 보고 시스템</h1>
+
+	<h2>사용자 메뉴</h2>
 	<ul>
-		<li><a href="generateKey.jsp">🔐 키 생성</a></li>
-		<li><a href="reportWrite.jsp">✍️ 내부 고발 작성</a></li>
-		<li><a href="reportList">📋 신고 목록 및 검증</a></li>
+		<li><a href="reportWrite.jsp">보고 작성 및 전자봉투 생성</a></li>
+		<li><a href="statusLookup.jsp">보고 상태 조회</a></li>
+	</ul>
+
+	<h2>관리자 메뉴</h2>
+	<ul>
+		<li><a href="envelopInput.jsp">전자봉투 열람 및 검증</a></li>
+		<li><a href="statusUpdate.jsp">보고 상태 변경</a></li>
 	</ul>
 </body>
 </html>

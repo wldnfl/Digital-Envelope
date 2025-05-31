@@ -1,18 +1,19 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <html>
 <head>
-<title>내부고발 작성</title>
+<title>신고 작성</title>
 </head>
 <body>
-	<h2>📨 내부 고발 신고</h2>
-	<form action="reportWrite" method="post">
-		<label>제목: <input type="text" name="title" required></label><br>
-		<br> <label>내용:<br> <textarea name="content"
-				rows="10" cols="50" required></textarea>
-		</label><br> <br>
-		<button type="submit">신고 제출 (전자봉투 생성)</button>
+	<h2>신고 작성하기</h2>
+
+	<form action="createEnvelope" method="post">
+		<label for="reportContent">신고 내용:</label><br />
+		<textarea id="reportContent" name="reportContent" rows="6" cols="50"
+			required></textarea>
+		<br /> <br /> <input type="submit" value="신고 접수 및 전자봉투 생성" />
 	</form>
+
 </body>
 </html>
+
+<%-- 신고 작성 및 전자봉투 생성 --%>
