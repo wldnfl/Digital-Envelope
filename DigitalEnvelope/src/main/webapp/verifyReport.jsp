@@ -25,7 +25,7 @@ String reportStatus = (String) request.getAttribute("reportStatus");
 		<%=reportStatus != null ? reportStatus : "상태 정보 없음"%></p>
 
 	<a href="envelopeInput.jsp">다른 전자봉투 검증하기</a> |
-	<a href="adminStatusTest">관리자 신고 상태 테스트</a> |
+	<a href="adminReportList">관리자 신고 상태 테스트</a> |
 	<a href="index.jsp">메인 페이지로</a>
 
 </body>

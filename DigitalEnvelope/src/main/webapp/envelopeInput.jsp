@@ -6,7 +6,7 @@
 <body>
 	<h2>전자봉투 열람 및 검증</h2>
 
-	<form action="verifyEnvelope" method="post">
+	<form action="verifyReport" method="post">
 		<label for="uniqueCode">고유코드 입력:</label><br /> <input type="text"
 			id="uniqueCode" name="uniqueCode" required /><br />
 		<br /> <input type="submit" value="전자봉투 열기 및 검증" />

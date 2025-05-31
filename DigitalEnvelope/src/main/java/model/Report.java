@@ -7,14 +7,18 @@ public class Report implements Serializable {
 
 	private String uniqueCode; // 고유 코드
 	private String reportContent; // 신고 내용 (원문)
-	private byte[] encryptedEnvelope; // 전자봉투 (ex. 암호화된 데이터)
+	// 전자봉투 암호문과 대칭키를 Base64 문자열로 저장
+	private String encryptedDocumentBase64;
+	private String encryptedSecretKeyBase64;
 	private boolean isVerified; // 검증 여부
 
-	public Report(String uniqueCode, String reportContent, byte[] encryptedEnvelope) {
+	public Report(String uniqueCode, String reportContent, String encryptedDocumentBase64,
+			String encryptedSecretKeyBase64) {
 		this.uniqueCode = uniqueCode;
 		this.reportContent = reportContent;
-		this.encryptedEnvelope = encryptedEnvelope;
-		this.isVerified = false; // 초기에는 검증 전(false)
+		this.encryptedDocumentBase64 = encryptedDocumentBase64;
+		this.encryptedSecretKeyBase64 = encryptedSecretKeyBase64;
+		this.isVerified = false;
 	}
 
 	public String getUniqueCode() {
@@ -29,12 +33,12 @@ public class Report implements Serializable {
 		this.reportContent = reportContent;
 	}
 
-	public byte[] getEncryptedEnvelope() {
-		return encryptedEnvelope;
+	public String getEncryptedDocumentBase64() {
+		return encryptedDocumentBase64;
 	}
 
-	public void setEncryptedEnvelope(byte[] encryptedEnvelope) {
-		this.encryptedEnvelope = encryptedEnvelope;
+	public String getEncryptedSecretKeyBase64() {
+		return encryptedSecretKeyBase64;
 	}
 
 	public boolean isVerified() {

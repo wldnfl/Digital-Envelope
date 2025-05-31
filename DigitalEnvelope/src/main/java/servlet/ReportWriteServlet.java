@@ -1,30 +1,26 @@
 package servlet;
 
-import model.Report;
-import repository.ReportRepository;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
+import model.Report;
+import repository.ReportRepository;
+import util.*;
+
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 
 @WebServlet("/reportWrite")
 public class ReportWriteServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	// 간단히 고유 코드 생성 (UUID)
 	private String generateUniqueCode() {
-		return UUID.randomUUID().toString().substring(0, 8); // 8자리 코드
-	}
-
-	// 간단 전자봉투 생성 예시 (원문 내용을 바이트 배열로 변환)
-	private byte[] createEnvelope(String reportContent) {
-		// 실제론 암호화 등 해야 하지만 여기선 단순 바이트 변환으로 대체
-		return reportContent.getBytes(StandardCharsets.UTF_8);
+		return java.util.UUID.randomUUID().toString().substring(0, 8);
 	}
 
 	@Override
@@ -33,23 +29,59 @@ public class ReportWriteServlet extends HttpServlet {
 
 		if (reportContent == null || reportContent.trim().isEmpty()) {
 			req.setAttribute("error", "신고 내용을 입력해주세요.");
-			req.getRequestDispatcher("reportWrite.jsp").forward(req, resp);
+			req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
 			return;
 		}
 
-		String uniqueCode = generateUniqueCode();
-		byte[] envelope = createEnvelope(reportContent);
+		try {
+			KeyManager keyManager = new KeyManager(getServletContext());
 
-		Report report = new Report(uniqueCode, reportContent, envelope);
-		ReportRepository.getInstance().saveReport(report);
+			if (!keyManager.isKeyPairExist()) {
+				resp.setContentType("text/html; charset=UTF-8");
+				PrintWriter out = resp.getWriter();
+				out.println("<script>alert('전자봉투 기능 사용 전, 키를 먼저 생성해주세요.'); history.back();</script>");
+				out.flush();
+				return;
+			}
 
-		req.setAttribute("uniqueCode", uniqueCode);
-		req.getRequestDispatcher("reportSuccess.jsp").forward(req, resp);
+			// 키가 있으면 loadKeyPair() 메서드 사용
+			KeyPair keyPair = keyManager.loadKeyPair();
+
+			String realPath = getServletContext().getRealPath("/");
+			SecretKey secretKey = SecretKeyManager.getOrCreateKey(realPath);
+
+			EnvelopeUtil.DigitalEnvelope envelope = EnvelopeUtil
+					.createEnvelope(reportContent.getBytes(StandardCharsets.UTF_8), keyPair.getPublic(), secretKey);
+
+			String encryptedDocumentBase64 = envelope.getEncryptedDocumentBase64();
+			String encryptedSecretKeyBase64 = envelope.getEncryptedSecretKeyBase64();
+
+			String uniqueCode = generateUniqueCode();
+
+			Report report = new Report(uniqueCode, reportContent, encryptedDocumentBase64, encryptedSecretKeyBase64);
+			ReportRepository.getInstance().saveReport(report);
+
+			req.setAttribute("uniqueCode", uniqueCode);
+			req.getRequestDispatcher("/reportSuccess.jsp").forward(req, resp);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			req.setAttribute("error", "전자봉투 생성 중 오류가 발생했습니다: " + e.getMessage());
+			req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
+		}
 	}
 
-	// 신고 작성 폼 요청 시 (GET)
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		req.getRequestDispatcher("reportWrite.jsp").forward(req, resp);
+		KeyManager keyManager = new KeyManager(getServletContext());
+		if (!keyManager.isKeyPairExist()) {
+			resp.setContentType("text/html; charset=UTF-8");
+			PrintWriter out = resp.getWriter();
+			out.println("<script>alert('키가 없습니다. 키를 먼저 생성해주세요.'); history.back();</script>");
+			out.flush();
+			return;
+		}
+		req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
 	}
+
 }

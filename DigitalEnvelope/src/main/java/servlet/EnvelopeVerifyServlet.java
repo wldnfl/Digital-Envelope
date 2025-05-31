@@ -1,24 +1,21 @@
 package servlet;
 
-import model.Report;
-import repository.ReportRepository;
-
-import java.io.IOException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
+import model.Report;
+import repository.ReportRepository;
+import util.*;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 
 @WebServlet("/verifyEnvelope")
 public class EnvelopeVerifyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	// 실제 검증 로직 자리 - 간단 예시로 통과 처리
-	private String verifyEnvelope(byte[] envelope) {
-		// TODO: 실제 전자봉투 서명 검증 로직 작성
-		return "서명 검증 성공";
-	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -38,18 +35,38 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			return;
 		}
 
-		String verificationResult = verifyEnvelope(report.getEncryptedEnvelope());
+		try {
+			KeyManager keyManager = new KeyManager(getServletContext());
+			KeyPair keyPair = keyManager.getOrCreateKeyPair();
 
-		// 검증 성공 시 상태 변경
-		if ("서명 검증 성공".equals(verificationResult)) {
-			report.setVerified(true); 
-			ReportRepository.getInstance().updateReport(report); // 저장소에 반영
+			// Envelope 객체 복원
+			EnvelopeUtil.DigitalEnvelope envelope = EnvelopeUtil.DigitalEnvelope
+					.fromBase64(report.getEncryptedDocumentBase64(), report.getEncryptedSecretKeyBase64());
+
+			// 복호화 시도
+			byte[] decryptedBytes = EnvelopeUtil.decryptEnvelope(envelope, keyPair.getPrivate());
+			String decryptedReportContent = new String(decryptedBytes, StandardCharsets.UTF_8);
+
+			// 원본 내용과 비교하여 검증 (단순 문자열 비교)
+			if (decryptedReportContent.equals(report.getReportContent())) {
+				report.setVerified(true);
+				ReportRepository.getInstance().updateReport(report);
+				req.setAttribute("verificationResult", "전자봉투 검증 성공");
+			} else {
+				req.setAttribute("verificationResult", "전자봉투 검증 실패: 내용 불일치");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			req.setAttribute("verificationResult", "전자봉투 검증 중 오류: " + e.getMessage());
 		}
 
-		req.setAttribute("verificationResult", verificationResult);
-		req.setAttribute("reportContent", report.getReportContent());
-		req.setAttribute("reportStatus", report.isVerified() ? "검증 완료" : "검증 전");
+		req.setAttribute("report", report);
+		req.getRequestDispatcher("envelopeDetail.jsp").forward(req, resp);
+	}
 
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.getRequestDispatcher("envelopeDetail.jsp").forward(req, resp);
 	}
 }

@@ -15,6 +15,7 @@
 	<h2>관리자 메뉴</h2>
 	<ul>
 		<li><a href="envelopeInput.jsp">전자봉투 열람 및 검증</a></li>
+		<li><a href="keyManagement">키 관리 페이지</a></li>
 	</ul>
 </body>
 </html>

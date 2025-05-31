@@ -1,10 +1,20 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+<!DOCTYPE html>
 <html>
 <head>
 <title>신고 작성</title>
 </head>
 <body>
 	<h2>신고 작성하기</h2>
+
+	<%
+	String error = (String) request.getAttribute("error");
+	if (error != null) {
+	%>
+	<p style="color: red;"><%=error%></p>
+	<%
+	}
+	%>
 
 	<form action="reportWrite" method="post">
 		<label for="reportContent">신고 내용:</label><br />
@@ -15,5 +25,3 @@
 
 </body>
 </html>
-
-<%-- 신고 작성 및 전자봉투 생성 --%>
