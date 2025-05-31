@@ -9,6 +9,10 @@ import repository.ReportRepository;
 import util.*;
 
 import javax.crypto.SecretKey;
+
+import exception.EmptyReportContentException;
+import exception.KeyNotExistException;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -27,21 +31,15 @@ public class ReportWriteServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String reportContent = req.getParameter("reportContent");
 
-		if (reportContent == null || reportContent.trim().isEmpty()) {
-			req.setAttribute("error", "신고 내용을 입력해주세요.");
-			req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
-			return;
-		}
-
 		try {
+			if (reportContent == null || reportContent.trim().isEmpty()) {
+				throw new EmptyReportContentException();
+			}
+
 			KeyManager keyManager = new KeyManager(getServletContext());
 
 			if (!keyManager.isKeyPairExist()) {
-				resp.setContentType("text/html; charset=UTF-8");
-				PrintWriter out = resp.getWriter();
-				out.println("<script>alert('전자봉투 기능 사용 전, 키를 먼저 생성해주세요.'); history.back();</script>");
-				out.flush();
-				return;
+				throw new KeyNotExistException();
 			}
 
 			// 키가 있으면 loadKeyPair() 메서드 사용
@@ -64,10 +62,18 @@ public class ReportWriteServlet extends HttpServlet {
 			req.setAttribute("uniqueCode", uniqueCode);
 			req.getRequestDispatcher("/reportSuccess.jsp").forward(req, resp);
 
+		} catch (EmptyReportContentException e) {
+			req.setAttribute("error", e.getMessage());
+			req.getRequestDispatcher("/reportWrite.jsp").forward(req, resp);
+		} catch (KeyNotExistException e) {
+			resp.setContentType("text/html; charset=UTF-8");
+			PrintWriter out = resp.getWriter();
+			out.println("<script>alert('" + e.getMessage() + "'); history.back();</script>");
+			out.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 			req.setAttribute("error", "전자봉투 생성 중 오류가 발생했습니다: " + e.getMessage());
-			req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
+			req.getRequestDispatcher("/reportWrite.jsp").forward(req, resp);
 		}
 	}
 
@@ -81,7 +87,7 @@ public class ReportWriteServlet extends HttpServlet {
 			out.flush();
 			return;
 		}
-		req.getRequestDispatcher("/reportwrite.jsp").forward(req, resp);
+		req.getRequestDispatcher("/reportWrite.jsp").forward(req, resp);
 	}
 
 }
