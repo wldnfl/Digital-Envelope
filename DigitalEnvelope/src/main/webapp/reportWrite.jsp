@@ -6,7 +6,7 @@
 <body>
 	<h2>신고 작성하기</h2>
 
-	<form action="createEnvelope" method="post">
+	<form action="reportWrite" method="post">
 		<label for="reportContent">신고 내용:</label><br />
 		<textarea id="reportContent" name="reportContent" rows="6" cols="50"
 			required></textarea>

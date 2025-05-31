@@ -1,60 +1,55 @@
 package servlet;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.security.KeyPair;
+import model.Report;
+import repository.ReportRepository;
 
-import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import model.Envelope;
-import util.EnvelopeCreator;
-import util.KeyManager;
-import util.SignatureUtil;
+import jakarta.servlet.http.*;
 
 @WebServlet("/reportWrite")
 public class ReportWriteServlet extends HttpServlet {
+
 	private static final long serialVersionUID = 1L;
 
+	// 간단히 고유 코드 생성 (UUID)
+	private String generateUniqueCode() {
+		return UUID.randomUUID().toString().substring(0, 8); // 8자리 코드
+	}
+
+	// 간단 전자봉투 생성 예시 (원문 내용을 바이트 배열로 변환)
+	private byte[] createEnvelope(String reportContent) {
+		// 실제론 암호화 등 해야 하지만 여기선 단순 바이트 변환으로 대체
+		return reportContent.getBytes(StandardCharsets.UTF_8);
+	}
+
+	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		try {
-			String title = req.getParameter("title");
-			String content = req.getParameter("content");
-			String reportText = title + "\n" + content;
+		String reportContent = req.getParameter("reportContent");
 
-			String keyFolderPath = getServletContext().getRealPath("/WEB-INF/keys");
-
-			KeyPair rsaKeys = KeyManager.loadRSAKeyPair(keyFolderPath);
-			SecretKey aesKey = KeyManager.generateAESKey(keyFolderPath);
-
-			Envelope envelope = EnvelopeCreator.createEnvelope(reportText, aesKey, rsaKeys.getPublic());
-			String signature = SignatureUtil.generateSignature(reportText, rsaKeys.getPrivate());
-
-			String reportsPath = getServletContext().getRealPath("/reports");
-			File folder = new File(reportsPath);
-			if (!folder.exists())
-				folder.mkdirs();
-
-			int reportId = folder.list().length + 1;
-			File file = new File(folder, "report_" + reportId + ".dat");
-
-			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-				oos.writeObject(envelope);
-				oos.writeObject(signature);
-				oos.writeObject(title);
-				oos.writeObject(content);
-			}
-
-			req.setAttribute("message", "신고가 안전하게 접수되었습니다.");
-		} catch (Exception e) {
-			req.setAttribute("message", "오류 발생: " + e.getMessage());
+		if (reportContent == null || reportContent.trim().isEmpty()) {
+			req.setAttribute("error", "신고 내용을 입력해주세요.");
+			req.getRequestDispatcher("reportWrite.jsp").forward(req, resp);
+			return;
 		}
-		req.getRequestDispatcher("reportResult.jsp").forward(req, resp);
+
+		String uniqueCode = generateUniqueCode();
+		byte[] envelope = createEnvelope(reportContent);
+
+		Report report = new Report(uniqueCode, reportContent, envelope);
+		ReportRepository.getInstance().saveReport(report);
+
+		req.setAttribute("uniqueCode", uniqueCode);
+		req.getRequestDispatcher("reportSuccess.jsp").forward(req, resp);
+	}
+
+	// 신고 작성 폼 요청 시 (GET)
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		req.getRequestDispatcher("reportWrite.jsp").forward(req, resp);
 	}
 }

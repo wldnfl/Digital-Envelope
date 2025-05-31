@@ -24,7 +24,9 @@ String message = (String) request.getAttribute("message");
 	}
 	%>
 
-	<a href="statusLookup.jsp">다시 조회하기</a>
+	<a href="statusLookup.jsp">다시 조회하기</a><br><br>
+	<a href="index.jsp">메인 페이지로</a>
+
 </body>
 </html>
 

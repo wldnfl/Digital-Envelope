@@ -14,8 +14,7 @@
 
 	<h2>관리자 메뉴</h2>
 	<ul>
-		<li><a href="envelopInput.jsp">전자봉투 열람 및 검증</a></li>
-		<li><a href="statusUpdate.jsp">보고 상태 변경</a></li>
+		<li><a href="envelopeInput.jsp">전자봉투 열람 및 검증</a></li>
 	</ul>
 </body>
 </html>
