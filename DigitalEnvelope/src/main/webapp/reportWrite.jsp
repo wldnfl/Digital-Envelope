@@ -3,6 +3,7 @@
 <html>
 <head>
 <title>신고 작성</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h2>신고 작성하기</h2>

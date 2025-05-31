@@ -6,6 +6,7 @@ String message = (String) request.getAttribute("message");
 <html>
 <head>
 <title>신고 상태 결과</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h2>신고 상태 결과</h2>
@@ -24,7 +25,9 @@ String message = (String) request.getAttribute("message");
 	}
 	%>
 
-	<a href="statusLookup.jsp">다시 조회하기</a><br><br>
+	<a href="statusLookup.jsp">다시 조회하기</a>
+	<br>
+	<br>
 	<a href="index.jsp">메인 페이지로</a>
 
 </body>

@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>내부 보고 시스템</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h1>내부 보고 시스템</h1>

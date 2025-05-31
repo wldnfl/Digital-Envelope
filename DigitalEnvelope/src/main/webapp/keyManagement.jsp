@@ -3,9 +3,10 @@
 <html>
 <head>
 <title>키 관리</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
-	<h1>키 관리</h1>
+	<h2>키 관리</h2>
 	<p>${keyStatus}</p>
 
 	<form method="post" action="keyManagement">

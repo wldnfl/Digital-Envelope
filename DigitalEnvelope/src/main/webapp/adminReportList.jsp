@@ -5,22 +5,7 @@
 <html>
 <head>
 <title>관리자 상태 테스트 페이지</title>
-<style>
-table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-th, td {
-	border: 1px solid #999;
-	padding: 8px;
-	text-align: left;
-}
-
-th {
-	background-color: #eee;
-}
-</style>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h2>관리자 상태 테스트</h2>
@@ -48,16 +33,18 @@ th {
 				? report.getReportContent().substring(0, 20) + "..."
 				: report.getReportContent();
 
-				// boolean isVerified 로 상태 표시
 				String displayStatus = report.isVerified() ? "검증 완료" : "검증 전";
 			%>
 			<tr>
 				<td><%=report.getUniqueCode()%></td>
-				<td><%=displayStatus%></td>
+				<td
+					class="<%=report.isVerified() ? "status-verified" : "status-unverified"%>">
+					<%=displayStatus%>
+				</td>
 				<td><%=summary != null ? summary : "내용 없음"%></td>
 			</tr>
 			<%
-			} // for end
+			}
 			%>
 		</tbody>
 	</table>

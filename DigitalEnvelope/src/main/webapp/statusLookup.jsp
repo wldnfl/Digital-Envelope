@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>신고 상태 조회</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h2>신고 상태 조회</h2>

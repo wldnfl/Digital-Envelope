@@ -5,6 +5,7 @@ String uniqueCode = (String) request.getAttribute("uniqueCode");
 <html>
 <head>
 <title>신고 접수 완료</title>
+<%@ include file="commonStyle.jsp"%>
 </head>
 <body>
 	<h2>신고가 정상 접수되었습니다.</h2>
