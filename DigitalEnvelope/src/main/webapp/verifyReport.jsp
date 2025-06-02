@@ -18,17 +18,17 @@ String reportStatus = (String) request.getAttribute("reportStatus");
 	</p>
 
 	<p>
-		<strong>신고 내용:</strong><br>
+		<strong>보고 내용:</strong><br>
 		<%=reportContent != null ? reportContent : "내용 없음"%>
 	<p>
-		<strong>신고 상태:</strong> <span
+		<strong>보고 상태:</strong> <span
 			class="<%="검증 완료".equals(reportStatus) ? "status-verified" : "status-unverified"%>">
 			<%=reportStatus != null ? reportStatus : "상태 정보 없음"%>
 		</span>
 	</p>
 
 	<a href="envelopeInput.jsp">다른 전자봉투 검증하기</a> |
-	<a href="adminReportList">관리자 신고 상태 테스트</a> |
+	<a href="adminReportList">관리자 보고 내역 페이지</a> |
 	<a href="index.jsp">메인 페이지로</a>
 </body>
 </html>

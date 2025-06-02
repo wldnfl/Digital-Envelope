@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 
-@WebServlet("/verifyEnvelope")
+@WebServlet("/verifyReport")
 public class EnvelopeVerifyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -28,19 +28,27 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			validateUniqueCode(uniqueCode);
 
 			Report report = getReportByUniqueCode(uniqueCode);
-
 			verifyEnvelope(report);
 
+			// 검증 성공 시 속성 설정
 			req.setAttribute("verificationResult", "전자봉투 검증 성공");
 			req.setAttribute("report", report);
+			req.setAttribute("reportContent", report.getReportContent());
+			req.setAttribute("reportStatus", report.isVerified() ? "검증 완료" : "검증 안됨");
 
 		} catch (UniqueCodeEmptyException | ReportNotFoundException e) {
 			req.setAttribute("verificationResult", e.getMessage());
+			req.setAttribute("reportContent", null);
+			req.setAttribute("reportStatus", null);
 		} catch (EnvelopeVerificationException e) {
 			req.setAttribute("verificationResult", e.getMessage());
+			req.setAttribute("reportContent", null);
+			req.setAttribute("reportStatus", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			req.setAttribute("verificationResult", "알 수 없는 오류가 발생했습니다: " + e.getMessage());
+			req.setAttribute("reportContent", null);
+			req.setAttribute("reportStatus", null);
 		}
 
 		req.getRequestDispatcher("verifyReport.jsp").forward(req, resp);
@@ -77,14 +85,14 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			String decryptedReportContent = new String(decryptedBytes, StandardCharsets.UTF_8);
 
 			if (!decryptedReportContent.equals(report.getReportContent())) {
-				throw new EnvelopeVerificationException("내용 불일치");
+				throw new EnvelopeVerificationException();
 			}
 
 			report.setVerified(true);
 			ReportRepository.getInstance().updateReport(report);
 
 		} catch (Exception e) {
-			throw new EnvelopeVerificationException(e.getMessage());
+			throw new EnvelopeVerificationException("전자봉투 검증 실패: " + e.getMessage());
 		}
 	}
 }

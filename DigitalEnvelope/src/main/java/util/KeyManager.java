@@ -67,12 +67,16 @@ public class KeyManager {
 		String realDir = context.getRealPath(KEY_DIR);
 		File dir = new File(realDir);
 		File pubFile = new File(dir, PUBLIC_KEY_FILE);
-		File priFile = new File(dir, PRIVATE_KEY_FILE);
-
 		System.out.println("[KeyManager] 키 경로: " + pubFile.getAbsolutePath());
+
+		if (!pubFile.exists())
+			return false;
+
+		File priFile = new File(dir, PRIVATE_KEY_FILE);
 		System.out.println("[KeyManager] 공개키 존재 여부: " + pubFile.exists());
 		System.out.println("[KeyManager] 개인키 존재 여부: " + priFile.exists());
-		return pubFile.exists() && priFile.exists();
+
+		return priFile.exists();
 	}
 
 	public String getKeyStatus() {

@@ -5,17 +5,17 @@ String message = (String) request.getAttribute("message");
 %>
 <html>
 <head>
-<title>신고 상태 결과</title>
+<title>보고 상태 결과</title>
 <%@ include file="commonStyle.jsp"%>
 </head>
 <body>
-	<h2>신고 상태 결과</h2>
+	<h2>보고 상태 결과</h2>
 
 	<%
 	if (reportStatus != null) {
 	%>
 	<p>
-		신고 상태: <strong><%=reportStatus%></strong>
+		보고 상태: <strong><%=reportStatus%></strong>
 	</p>
 	<%
 	} else {

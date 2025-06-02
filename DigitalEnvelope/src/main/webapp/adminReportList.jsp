@@ -4,18 +4,18 @@
 
 <html>
 <head>
-<title>관리자 상태 테스트 페이지</title>
+<title>관리자 보고 내역 페이지</title>
 <%@ include file="commonStyle.jsp"%>
 </head>
 <body>
-	<h2>관리자 상태 테스트</h2>
+	<h2>보고 내역</h2>
 
 	<%
 	Collection<Report> reports = (Collection<Report>) request.getAttribute("reports");
 	if (reports != null && !reports.isEmpty()) {
 	%>
 	<p>
-		총 신고 건수:
+		총 보고 건수:
 		<%=reports.size()%></p>
 	<hr>
 	<table>
@@ -23,7 +23,7 @@
 			<tr>
 				<th>고유 코드</th>
 				<th>상태</th>
-				<th>신고 내용 요약</th>
+				<th>보고 내용 요약</th>
 			</tr>
 		</thead>
 		<tbody>
