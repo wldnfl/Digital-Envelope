@@ -12,6 +12,8 @@ public enum ErrorCode {
     EMPTY_REPORT_CONTENT("신고 내용을 입력해주세요."),
     KEY_NOT_EXIST("키가 존재하지 않습니다. 키를 먼저 생성해주세요."),
 	ENVELOPE_VERIFICATION("전자봉투 검증 중 오류가 발생했습니다."),
+	ENVELOPE_CREATE_FAIL("전자봉투 생성에 실패했습니다."),
+	ENVELOPE_DECRYPT_FAIL("전자봉투 복호화에 실패했습니다."),
 	REPORT_RETRIEVAL_FAIL("신고 목록 조회에 실패했습니다.");
 
 	private final String message;

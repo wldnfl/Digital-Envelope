@@ -19,6 +19,7 @@ public class StatusLookupServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			// 사용자가 입력한 고유 코드 조회 및 검증
 			String uniqueCode = req.getParameter("uniqueCode");
 			validateUniqueCode(uniqueCode);
 
@@ -35,13 +36,13 @@ public class StatusLookupServlet extends HttpServlet {
 		req.getRequestDispatcher("statusResult.jsp").forward(req, resp);
 	}
 
-	private void validateUniqueCode(String uniqueCode) throws UniqueCodeEmptyException {
+	private void validateUniqueCode(String uniqueCode) {
 		if (uniqueCode == null || uniqueCode.trim().isEmpty()) {
 			throw new UniqueCodeEmptyException();
 		}
 	}
 
-	private Report getReportByUniqueCode(String uniqueCode) throws ReportNotFoundException {
+	private Report getReportByUniqueCode(String uniqueCode) {
 		Report report = ReportRepository.getInstance().getReport(uniqueCode);
 		if (report == null) {
 			throw new ReportNotFoundException();

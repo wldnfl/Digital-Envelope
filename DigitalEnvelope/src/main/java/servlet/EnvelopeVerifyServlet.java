@@ -92,7 +92,7 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			ReportRepository.getInstance().updateReport(report);
 
 		} catch (Exception e) {
-			throw new EnvelopeVerificationException("전자봉투 검증 실패: " + e.getMessage());
+			throw new EnvelopeVerificationException(e);
 		}
 	}
 }

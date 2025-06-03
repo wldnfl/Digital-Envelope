@@ -6,7 +6,7 @@ public class EnvelopeVerificationException extends BaseException {
 		super(ErrorCode.ENVELOPE_VERIFICATION);
 	}
 
-	public EnvelopeVerificationException(String detailMessage) {
-		super(ErrorCode.ENVELOPE_VERIFICATION, detailMessage);
+	public EnvelopeVerificationException(Throwable casue) {
+		super(ErrorCode.ENVELOPE_VERIFICATION);
 	}
 }

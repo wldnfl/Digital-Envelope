@@ -10,9 +10,8 @@ public class BaseException extends RuntimeException {
 		this.errorCode = errorCode;
 	}
 
-	// 상세 메시지를 받을 수 있는 생성자 추가
-	public BaseException(ErrorCode errorCode, String detailMessage) {
-		super(errorCode.getMessage() + ": " + detailMessage);
+	public BaseException(ErrorCode errorCode, Throwable cause) {
+		super(errorCode.getMessage(), cause);
 		this.errorCode = errorCode;
 	}
 
