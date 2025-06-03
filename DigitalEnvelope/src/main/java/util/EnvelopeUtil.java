@@ -20,6 +20,10 @@ public class EnvelopeUtil {
 	// 문서 암호화 + 대칭키 암호화 -> 전자봉투 생성
 	public static DigitalEnvelope createEnvelope(byte[] documentData, PublicKey receiverPublicKey,
 			SecretKey secretKey) {
+		Objects.requireNonNull(documentData, "documentData must not be null");
+		Objects.requireNonNull(receiverPublicKey, "receiverPublicKey must not be null");
+		Objects.requireNonNull(secretKey, "secretKey must not be null");
+		
 		try {
 			byte[] encryptedDocument = encryptDocument(documentData, secretKey);
 			byte[] encryptedSecretKey = encryptSecretKey(secretKey.getEncoded(), receiverPublicKey);

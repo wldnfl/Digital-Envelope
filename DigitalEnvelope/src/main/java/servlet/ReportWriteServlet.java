@@ -9,7 +9,6 @@ import repository.ReportRepository;
 import util.*;
 
 import javax.crypto.SecretKey;
-
 import exception.EmptyReportContentException;
 import exception.KeyNotExistException;
 
@@ -42,21 +41,24 @@ public class ReportWriteServlet extends HttpServlet {
 				throw new KeyNotExistException();
 			}
 
-			// 키가 있으면 loadKeyPair() 메서드 사용
 			KeyPair keyPair = keyManager.loadKeyPair();
 
-			String realPath = getServletContext().getRealPath("/");
-			SecretKey secretKey = SecretKeyManager.getOrCreateKey(realPath);
+			SecretKeyManager secretKeyManager = new SecretKeyManager(getServletContext());
+			SecretKey secretKey = secretKeyManager.getOrCreateKey();
 
-			DigitalEnvelope envelope = EnvelopeUtil
-					.createEnvelope(reportContent.getBytes(StandardCharsets.UTF_8), keyPair.getPublic(), secretKey);
+			DigitalEnvelope envelope = EnvelopeUtil.createEnvelope(reportContent.getBytes(StandardCharsets.UTF_8),
+					keyPair.getPublic(), secretKey);
 
 			String encryptedDocumentBase64 = envelope.getEncryptedDocumentBase64();
 			String encryptedSecretKeyBase64 = envelope.getEncryptedSecretKeyBase64();
 
 			String uniqueCode = generateUniqueCode();
 
-			Report report = new Report(uniqueCode, reportContent, encryptedDocumentBase64, encryptedSecretKeyBase64);
+			byte[] signature = SignatureUtil.sign(reportContent.getBytes(StandardCharsets.UTF_8), keyPair.getPrivate());
+			String signatureBase64 = Base64Util.encode(signature);
+
+			Report report = new Report(uniqueCode, reportContent, encryptedDocumentBase64, encryptedSecretKeyBase64,
+					signatureBase64);
 			ReportRepository.getInstance().saveReport(report);
 
 			req.setAttribute("uniqueCode", uniqueCode);
@@ -89,5 +91,4 @@ public class ReportWriteServlet extends HttpServlet {
 		}
 		req.getRequestDispatcher("/reportWrite.jsp").forward(req, resp);
 	}
-
 }

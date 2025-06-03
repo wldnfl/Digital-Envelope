@@ -29,9 +29,9 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			validateUniqueCode(uniqueCode);
 
 			Report report = getReportByUniqueCode(uniqueCode);
-			verifyEnvelope(report);
+			verifyEnvelopeAndSignature(report);
 
-			setVerificationAttributes(req, "전자봉투 검증 성공", report);
+			setVerificationAttributes(req, "전자봉투 + 전자서명 검증 성공", report);
 
 		} catch (UniqueCodeEmptyException | ReportNotFoundException e) {
 			setVerificationAttributes(req, e.getMessage(), null);
@@ -56,8 +56,9 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 
 	private void setVerificationAttributes(HttpServletRequest req, String result, Report report) {
 		req.setAttribute("verificationResult", result);
-		req.setAttribute("reportContent", report != null ? report.getReportContent() : null);
-		req.setAttribute("reportStatus", report != null ? (report.isVerified() ? "검증 완료" : "검증 안됨") : null);
+		req.setAttribute("reportContent",
+				report != null && report.getReportContent() != null ? report.getReportContent() : "미제공");
+		req.setAttribute("reportStatus", report != null ? (report.isVerified() ? "검증 완료" : "검증 안됨") : "미제공");
 	}
 
 	private void validateUniqueCode(String uniqueCode) throws UniqueCodeEmptyException {
@@ -74,7 +75,7 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 		return report;
 	}
 
-	private void verifyEnvelope(Report report) throws EnvelopeVerificationException {
+	private void verifyEnvelopeAndSignature(Report report) throws EnvelopeVerificationException {
 		try {
 			KeyManager keyManager = new KeyManager(getServletContext());
 			KeyPair keyPair = keyManager.getOrCreateKeyPair();
@@ -86,6 +87,15 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			String decryptedReportContent = new String(decryptedBytes, StandardCharsets.UTF_8);
 
 			if (!decryptedReportContent.equals(report.getReportContent())) {
+				throw new EnvelopeVerificationException();
+			}
+
+			// 전자서명 검증
+			boolean validSignature = SignatureUtil.verifyFromBase64(
+					decryptedReportContent.getBytes(StandardCharsets.UTF_8), report.getSignatureBase64(),
+					keyPair.getPublic());
+
+			if (!validSignature) {
 				throw new EnvelopeVerificationException();
 			}
 
