@@ -3,7 +3,7 @@ package servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
+import model.DigitalEnvelope;
 import model.Report;
 import repository.ReportRepository;
 import util.*;
@@ -48,7 +48,7 @@ public class ReportWriteServlet extends HttpServlet {
 			String realPath = getServletContext().getRealPath("/");
 			SecretKey secretKey = SecretKeyManager.getOrCreateKey(realPath);
 
-			EnvelopeUtil.DigitalEnvelope envelope = EnvelopeUtil
+			DigitalEnvelope envelope = EnvelopeUtil
 					.createEnvelope(reportContent.getBytes(StandardCharsets.UTF_8), keyPair.getPublic(), secretKey);
 
 			String encryptedDocumentBase64 = envelope.getEncryptedDocumentBase64();

@@ -3,7 +3,7 @@ package servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
+import model.DigitalEnvelope;
 import model.Report;
 import repository.ReportRepository;
 import util.*;
@@ -78,7 +78,7 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			KeyManager keyManager = new KeyManager(getServletContext());
 			KeyPair keyPair = keyManager.getOrCreateKeyPair();
 
-			EnvelopeUtil.DigitalEnvelope envelope = EnvelopeUtil.DigitalEnvelope
+			DigitalEnvelope envelope = DigitalEnvelope
 					.fromBase64(report.getEncryptedDocumentBase64(), report.getEncryptedSecretKeyBase64());
 
 			byte[] decryptedBytes = EnvelopeUtil.decryptEnvelope(envelope, keyPair.getPrivate());
