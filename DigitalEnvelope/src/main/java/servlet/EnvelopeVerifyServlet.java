@@ -20,43 +20,44 @@ import java.security.KeyPair;
 public class EnvelopeVerifyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private static final String UNIQUE_CODE = "uniqueCode";
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			String uniqueCode = req.getParameter("uniqueCode");
+			String uniqueCode = req.getParameter(UNIQUE_CODE);
 			validateUniqueCode(uniqueCode);
 
 			Report report = getReportByUniqueCode(uniqueCode);
 			verifyEnvelope(report);
 
-			// 검증 성공 시 속성 설정
-			req.setAttribute("verificationResult", "전자봉투 검증 성공");
-			req.setAttribute("report", report);
-			req.setAttribute("reportContent", report.getReportContent());
-			req.setAttribute("reportStatus", report.isVerified() ? "검증 완료" : "검증 안됨");
+			setVerificationAttributes(req, "전자봉투 검증 성공", report);
 
 		} catch (UniqueCodeEmptyException | ReportNotFoundException e) {
-			req.setAttribute("verificationResult", e.getMessage());
-			req.setAttribute("reportContent", null);
-			req.setAttribute("reportStatus", null);
+			setVerificationAttributes(req, e.getMessage(), null);
 		} catch (EnvelopeVerificationException e) {
-			req.setAttribute("verificationResult", e.getMessage());
-			req.setAttribute("reportContent", null);
-			req.setAttribute("reportStatus", null);
+			setVerificationAttributes(req, e.getMessage(), null);
 		} catch (Exception e) {
 			e.printStackTrace();
-			req.setAttribute("verificationResult", "알 수 없는 오류가 발생했습니다: " + e.getMessage());
-			req.setAttribute("reportContent", null);
-			req.setAttribute("reportStatus", null);
+			setVerificationAttributes(req, "알 수 없는 오류가 발생했습니다: " + e.getMessage(), null);
 		}
 
-		req.getRequestDispatcher("verifyReport.jsp").forward(req, resp);
+		forwardToPage(req, resp);
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		forwardToPage(req, resp);
+	}
+
+	private void forwardToPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.getRequestDispatcher("verifyReport.jsp").forward(req, resp);
+	}
+
+	private void setVerificationAttributes(HttpServletRequest req, String result, Report report) {
+		req.setAttribute("verificationResult", result);
+		req.setAttribute("reportContent", report != null ? report.getReportContent() : null);
+		req.setAttribute("reportStatus", report != null ? (report.isVerified() ? "검증 완료" : "검증 안됨") : null);
 	}
 
 	private void validateUniqueCode(String uniqueCode) throws UniqueCodeEmptyException {
@@ -78,8 +79,8 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			KeyManager keyManager = new KeyManager(getServletContext());
 			KeyPair keyPair = keyManager.getOrCreateKeyPair();
 
-			DigitalEnvelope envelope = DigitalEnvelope
-					.fromBase64(report.getEncryptedDocumentBase64(), report.getEncryptedSecretKeyBase64());
+			DigitalEnvelope envelope = DigitalEnvelope.fromBase64(report.getEncryptedDocumentBase64(),
+					report.getEncryptedSecretKeyBase64());
 
 			byte[] decryptedBytes = EnvelopeUtil.decryptEnvelope(envelope, keyPair.getPrivate());
 			String decryptedReportContent = new String(decryptedBytes, StandardCharsets.UTF_8);
