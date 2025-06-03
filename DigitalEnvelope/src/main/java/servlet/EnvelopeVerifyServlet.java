@@ -14,7 +14,8 @@ import exception.EnvelopeVerificationException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 @WebServlet("/verifyReport")
 public class EnvelopeVerifyServlet extends HttpServlet {
@@ -31,7 +32,7 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			Report report = getReportByUniqueCode(uniqueCode);
 			verifyEnvelopeAndSignature(report);
 
-			setVerificationAttributes(req, "전자봉투 + 전자서명 검증 성공", report);
+			setVerificationAttributes(req, "성공", report);
 
 		} catch (UniqueCodeEmptyException | ReportNotFoundException e) {
 			setVerificationAttributes(req, e.getMessage(), null);
@@ -77,15 +78,22 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 
 	private void verifyEnvelopeAndSignature(Report report) throws EnvelopeVerificationException {
 		try {
-			KeyManager keyManager = new KeyManager(getServletContext());
-			KeyPair keyPair = keyManager.getOrCreateKeyPair();
+			// 관리자 개인키 (전자봉투 복호화용)
+			KeyManager adminKeyManager = new KeyManager(getServletContext(), UserType.ADMIN);
+			PrivateKey adminPrivateKey = adminKeyManager.loadKeyPair().getPrivate();
+
+			// 작성자 공개키 (전자서명 검증용)
+			KeyManager writerKeyManager = new KeyManager(getServletContext(), UserType.REPORTER);
+			PublicKey writerPublicKey = writerKeyManager.loadKeyPair().getPublic();
 
 			DigitalEnvelope envelope = DigitalEnvelope.fromBase64(report.getEncryptedDocumentBase64(),
 					report.getEncryptedSecretKeyBase64());
 
-			byte[] decryptedBytes = EnvelopeUtil.decryptEnvelope(envelope, keyPair.getPrivate());
+			// 복호화
+			byte[] decryptedBytes = EnvelopeUtil.decryptEnvelope(envelope, adminPrivateKey);
 			String decryptedReportContent = new String(decryptedBytes, StandardCharsets.UTF_8);
 
+			// 전자봉투 내용과 원문 비교
 			if (!decryptedReportContent.equals(report.getReportContent())) {
 				throw new EnvelopeVerificationException();
 			}
@@ -93,12 +101,13 @@ public class EnvelopeVerifyServlet extends HttpServlet {
 			// 전자서명 검증
 			boolean validSignature = SignatureUtil.verifyFromBase64(
 					decryptedReportContent.getBytes(StandardCharsets.UTF_8), report.getSignatureBase64(),
-					keyPair.getPublic());
+					writerPublicKey);
 
 			if (!validSignature) {
 				throw new EnvelopeVerificationException();
 			}
 
+			// 검증 성공 시 상태 저장
 			report.setVerified(true);
 			ReportRepository.getInstance().updateReport(report);
 

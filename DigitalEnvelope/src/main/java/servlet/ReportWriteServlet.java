@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 @WebServlet("/reportWrite")
 public class ReportWriteServlet extends HttpServlet {
@@ -35,26 +37,31 @@ public class ReportWriteServlet extends HttpServlet {
 				throw new EmptyReportContentException();
 			}
 
-			KeyManager keyManager = new KeyManager(getServletContext());
+			KeyManager adminKeyManager = new KeyManager(getServletContext(), UserType.ADMIN);
+			KeyManager writerKeyManager = new KeyManager(getServletContext(), UserType.REPORTER);
 
-			if (!keyManager.isKeyPairExist()) {
+			// 키 존재 확인
+			if (!adminKeyManager.isKeyPairExist() || !writerKeyManager.isKeyPairExist()) {
 				throw new KeyNotExistException();
 			}
 
-			KeyPair keyPair = keyManager.loadKeyPair();
+			// 키 로딩
+			PublicKey adminPub = adminKeyManager.loadKeyPair().getPublic();
+			PrivateKey writerPriv = writerKeyManager.loadKeyPair().getPrivate();
 
 			SecretKeyManager secretKeyManager = new SecretKeyManager(getServletContext());
 			SecretKey secretKey = secretKeyManager.getOrCreateKey();
 
 			DigitalEnvelope envelope = EnvelopeUtil.createEnvelope(reportContent.getBytes(StandardCharsets.UTF_8),
-					keyPair.getPublic(), secretKey);
+					adminPub, // 수신자의 공개키로 암호화
+					secretKey);
 
 			String encryptedDocumentBase64 = envelope.getEncryptedDocumentBase64();
 			String encryptedSecretKeyBase64 = envelope.getEncryptedSecretKeyBase64();
 
 			String uniqueCode = generateUniqueCode();
 
-			byte[] signature = SignatureUtil.sign(reportContent.getBytes(StandardCharsets.UTF_8), keyPair.getPrivate());
+			byte[] signature = SignatureUtil.sign(reportContent.getBytes(StandardCharsets.UTF_8), writerPriv);
 			String signatureBase64 = Base64Util.encode(signature);
 
 			Report report = new Report(uniqueCode, reportContent, encryptedDocumentBase64, encryptedSecretKeyBase64,
@@ -81,7 +88,7 @@ public class ReportWriteServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		KeyManager keyManager = new KeyManager(getServletContext());
+		KeyManager keyManager = new KeyManager(getServletContext(), UserType.REPORTER);
 		if (!keyManager.isKeyPairExist()) {
 			resp.setContentType("text/html; charset=UTF-8");
 			PrintWriter out = resp.getWriter();

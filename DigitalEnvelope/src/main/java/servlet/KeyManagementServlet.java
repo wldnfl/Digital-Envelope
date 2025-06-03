@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import util.KeyManager;
+import util.UserType;
 import exception.KeyCreateException;
 import exception.KeyDeleteException;
 
@@ -47,18 +48,34 @@ public class KeyManagementServlet extends HttpServlet {
 
 	private void processRequest(HttpServletRequest req, HttpServletResponse resp, Action action)
 			throws ServletException, IOException {
-		KeyManager keyManager = new KeyManager(getServletContext());
+		String typeParam = req.getParameter("type");
+		if (typeParam == null) {
+			req.setAttribute("keyStatus", "UserType을 지정해주세요.");
+			req.getRequestDispatcher("/keyManagement.jsp").forward(req, resp);
+			return;
+		}
+
+		UserType userType;
+		try {
+			userType = UserType.valueOf(typeParam.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			req.setAttribute("keyStatus", "유효하지 않은 UserType입니다.");
+			req.getRequestDispatcher("/keyManagement.jsp").forward(req, resp);
+			return;
+		}
+
+		KeyManager keyManager = new KeyManager(getServletContext(), userType);
 
 		if (action != null) {
 			try {
 				switch (action) {
 				case CREATE:
 					keyManager.createKeyPair();
-					req.setAttribute("keyStatus", "새 키를 성공적으로 생성했습니다.");
+					req.setAttribute("keyStatus", userType + "용 새 키를 성공적으로 생성했습니다.");
 					break;
 				case DELETE:
 					keyManager.deleteKeyPair();
-					req.setAttribute("keyStatus", "키가 삭제되었습니다.");
+					req.setAttribute("keyStatus", userType + "용 키가 삭제되었습니다.");
 					break;
 				}
 			} catch (KeyCreateException | KeyDeleteException e) {
@@ -68,10 +85,8 @@ public class KeyManagementServlet extends HttpServlet {
 				req.setAttribute("keyStatus", "알 수 없는 오류가 발생했습니다: " + e.getMessage());
 			}
 		} else if (action == null && req.getMethod().equalsIgnoreCase("GET")) {
-			// doGet일 때 키 상태만 보여주기
 			req.setAttribute("keyStatus", keyManager.getKeyStatus());
 		} else if (action == null && req.getMethod().equalsIgnoreCase("POST")) {
-			// POST인데 action 값이 이상할 경우
 			req.setAttribute("keyStatus", "알 수 없는 작업입니다.");
 		}
 

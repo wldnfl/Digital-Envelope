@@ -5,8 +5,8 @@ import java.io.Serializable;
 public class Report implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private String uniqueCode; // 고유 코드
-	private String reportContent; // 신고 내용 (원문)
+	private String uniqueCode; // 고유 코드 
+	private String reportContent; // 신고 내용
 	private String encryptedDocumentBase64;
 	private String encryptedSecretKeyBase64;
 	private boolean isVerified;
