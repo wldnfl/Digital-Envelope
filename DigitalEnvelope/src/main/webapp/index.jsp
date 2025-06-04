@@ -6,10 +6,12 @@
 </head>
 <body>
 	<h1>내부 보고 시스템</h1>
-
-	<h2>사용자 메뉴</h2>
+	<h2>공통 메뉴</h2>
 	<ul>
 		<li><a href="keyManagement">키 관리 페이지</a></li>
+	</ul>
+	<h2>사용자 메뉴</h2>
+	<ul>
 		<li><a href="reportWrite.jsp">보고 작성 및 전자봉투 생성</a></li>
 		<li><a href="statusLookup.jsp">보고 상태 조회</a></li>
 	</ul>
